@@ -68,13 +68,17 @@ describe('BlinkDetector', () => {
     const open = makeLandmarks(0.35, 0.35)
     const closed = makeLandmarks(0.05, 0.05)
 
-    detector.detect(open) // start open
-    detector.detect(closed) // close (blink start)
+    // Establish open baseline for the EMA smoother
+    for (let i = 0; i < 5; i++) detector.detect(open)
+    // Sustain closed for several frames so EMA drops below threshold
+    for (let i = 0; i < 5; i++) detector.detect(closed)
 
-    // Wait for minimum blink duration (>50ms) before releasing
-    await new Promise((r) => setTimeout(r, 60))
+    // Wait for minimum blink duration
+    await new Promise((r) => setTimeout(r, 100))
 
-    const state = detector.detect(open) // release
+    // Release — several open frames to bring EMA back up
+    for (let i = 0; i < 5; i++) detector.detect(open)
+    const state = detector.detect(open)
     expect(state.blinkCount).toBe(1)
   })
 

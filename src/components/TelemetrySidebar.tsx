@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import type { FaceEngineState } from '@/engine/FaceEngine'
 import { SignalIndicator } from './SignalIndicator'
+import { signalBus } from '@/engine/SignalBus'
 import { theme } from '@/styles/theme'
 
 interface TelemetrySidebarProps {
@@ -34,6 +36,7 @@ export function TelemetrySidebar({ state }: TelemetrySidebarProps) {
         <SignalIndicator label="R EAR" value={blink.rightEAR} />
         <Row label="Blinks" value={blink.blinkCount} />
         <Row label="Blinking" value={blink.isBlinking ? 'YES' : 'no'} />
+        <BlinkFlash />
       </Section>
 
       <Section title="Expression">
@@ -48,6 +51,41 @@ export function TelemetrySidebar({ state }: TelemetrySidebarProps) {
         <Row label="Gesture" value={gesture} />
       </Section>
 
+    </div>
+  )
+}
+
+function BlinkFlash() {
+  const [flash, setFlash] = useState<{ label: string; color: string } | null>(null)
+
+  useEffect(() => {
+    return signalBus.on('blink', (signal) => {
+      const map: Record<string, { label: string; color: string }> = {
+        blink: { label: 'BLINK', color: theme.colors.accent },
+        doubleBlink: { label: 'DOUBLE BLINK', color: theme.colors.accentWarm },
+        winkLeft: { label: 'WINK L', color: theme.colors.accentPurple },
+        winkRight: { label: 'WINK R', color: theme.colors.accentPurple },
+      }
+      setFlash(map[signal.type] ?? null)
+      setTimeout(() => setFlash(null), 500)
+    })
+  }, [])
+
+  if (!flash) return null
+
+  return (
+    <div style={{
+      marginTop: 6, padding: '6px 10px',
+      background: `${flash.color}33`,
+      border: `2px solid ${flash.color}`,
+      borderRadius: 6,
+      color: flash.color,
+      fontSize: 12,
+      fontWeight: 600,
+      textAlign: 'center',
+      transition: 'opacity 150ms',
+    }}>
+      {flash.label}
     </div>
   )
 }

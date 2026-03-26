@@ -5,10 +5,8 @@ import { useBlinkConfirm } from './useBlinkConfirm'
 import { theme } from '@/styles/theme'
 
 const NUMBERS = Array.from({ length: 10 }, (_, i) => i + 1)
-// Padding around each cell that counts as "still looking at it" (hysteresis)
-const HIT_PADDING = 40
-// How long gaze must be on a new cell before it switches (ms)
-const SWITCH_DELAY_MS = 150
+const HIT_PADDING = 50
+const SWITCH_DELAY_MS = 300
 
 export function NumberPick() {
   const gaze = useGazePosition()
@@ -90,8 +88,8 @@ export function NumberPick() {
       description="Look at a number, then double-blink to select it."
     >
       <div style={{
-        display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center',
-        flexWrap: 'wrap', marginTop: 40,
+        display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: 16, marginTop: 24, maxWidth: 700, margin: '24px auto 0',
       }}>
         {NUMBERS.map((num, i) => {
           const isHovered = hoveredIdx === i
@@ -102,7 +100,7 @@ export function NumberPick() {
               key={num}
               ref={(el) => { cellRefs.current[i] = el }}
               style={{
-                width: 72, height: 72,
+                width: '100%', aspectRatio: '1', minHeight: 80,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 borderRadius: theme.radii.md,
                 border: `3px solid ${isFlashing ? theme.colors.accentWarm : isSelected ? theme.colors.accentWarm : isHovered ? theme.colors.accent : theme.colors.border}`,

@@ -1,8 +1,8 @@
 import type { Point } from '@/utils/geometry'
 import { eyeAspectRatio } from '@/utils/geometry'
+import { EMASmoother } from '@/utils/smoothing'
 import { THRESHOLDS } from '@/utils/constants'
 
-// 68-landmark model eye indices
 const LEFT_EYE_INDICES = [36, 37, 38, 39, 40, 41]
 const RIGHT_EYE_INDICES = [42, 43, 44, 45, 46, 47]
 
@@ -22,13 +22,19 @@ export class BlinkDetector {
   private blinkStartTime = 0
   private lastBlinkTime = 0
   private pendingDoubleBlink = false
+  // Smooth EAR to reject single-frame jitter from head movement
+  private leftSmoother = new EMASmoother(0.4)
+  private rightSmoother = new EMASmoother(0.4)
 
   detect(landmarks: Point[]): BlinkState {
     const leftEye = LEFT_EYE_INDICES.map((i) => landmarks[i]!)
     const rightEye = RIGHT_EYE_INDICES.map((i) => landmarks[i]!)
 
-    const leftEAR = eyeAspectRatio(leftEye)
-    const rightEAR = eyeAspectRatio(rightEye)
+    const rawLeftEAR = eyeAspectRatio(leftEye)
+    const rawRightEAR = eyeAspectRatio(rightEye)
+
+    const leftEAR = this.leftSmoother.update(rawLeftEAR)
+    const rightEAR = this.rightSmoother.update(rawRightEAR)
     const avgEAR = (leftEAR + rightEAR) / 2
 
     const isBlinking = avgEAR < THRESHOLDS.EAR_BLINK
@@ -58,8 +64,10 @@ export class BlinkDetector {
       this.pendingDoubleBlink = false
     }
 
-    const leftWink = leftEAR < THRESHOLDS.EAR_WINK_CLOSED && rightEAR > THRESHOLDS.EAR_WINK_OPEN
-    const rightWink = rightEAR < THRESHOLDS.EAR_WINK_CLOSED && leftEAR > THRESHOLDS.EAR_WINK_OPEN
+    // Wink: one eye's EAR significantly below the other, while not fully blinking
+    const earDiff = Math.abs(leftEAR - rightEAR)
+    const leftWink = !isBlinking && earDiff > 0.06 && leftEAR < rightEAR
+    const rightWink = !isBlinking && earDiff > 0.06 && rightEAR < leftEAR
 
     this.wasBlinking = isBlinking
 
@@ -72,5 +80,7 @@ export class BlinkDetector {
     this.blinkStartTime = 0
     this.lastBlinkTime = 0
     this.pendingDoubleBlink = false
+    this.leftSmoother.reset()
+    this.rightSmoother.reset()
   }
 }

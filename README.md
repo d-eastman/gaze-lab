@@ -2,7 +2,13 @@
 
 **"How many input channels does a human face have?"**
 
+**[Try it now](https://d-eastman.github.io/gaze-lab/)** — runs entirely in your browser, no install needed. Just allow camera access.
+
 Gaze Lab is a browser-based experimental platform that explores non-touch, non-voice human-computer interaction using only a webcam. It extracts multiple simultaneous input channels from your face — gaze direction, blinks, facial expressions, and head pose — and lets you interact with five different experiments using nothing but your face.
+
+![Expression Bandwidth — detecting a smile at 100% confidence](gaze-lab--happy.png)
+
+![Gaze Draw — drawing with eye movement](gaze-lab--draw.png)
 
 ## Quick Start
 
@@ -65,7 +71,7 @@ The platform detects these signals from your webcam:
 ```bash
 npm run dev          # Development server
 npm run build        # Production build
-npm test             # Run tests (80 tests)
+npm test             # Run tests (82 tests)
 npm run test:watch   # Tests in watch mode
 npm run lint         # ESLint
 ```
@@ -74,7 +80,7 @@ npm run lint         # ESLint
 
 - **React 19** + TypeScript + Vite
 - **face-api.js** (`@vladmandic/face-api`) — Face detection, 68-point landmarks, expression classification
-- **Vitest** + React Testing Library — 80 unit/integration tests
+- **Vitest** + React Testing Library — 82 unit/integration tests
 
 ## Project Structure
 
