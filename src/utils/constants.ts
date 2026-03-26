@@ -28,4 +28,4 @@ export const THRESHOLDS = {
   RECALIB_RESIZE_THRESHOLD: 100,
 } as const
 
-export const MODEL_PATH = '/models'
+export const MODEL_PATH = import.meta.env.BASE_URL + 'models'
